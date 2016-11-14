@@ -12,7 +12,7 @@
 
 #define DEFAULT_HOST "*"
 #define DEFAULT_PORT 10010
-//#define DEFAULT_BUFSIZE 100
+#define DEFAULT_RCVBUF 0
 
 void help_message(int argc, const char *argv[]) {
 
@@ -20,6 +20,7 @@ void help_message(int argc, const char *argv[]) {
     printf("\t--help         'Help message'\n");
     printf("\t-h host        'Listen ip. Default %s.'\n", DEFAULT_HOST);
     printf("\t-p port        'Listen port. Default %d.'\n", DEFAULT_PORT);
+    printf("\t-rb RCVBUF     'Set RCVBUF size. Default %d.'\n", DEFAULT_RCVBUF);
 }
 
 int main(int argc, const char *argv[])
@@ -27,6 +28,7 @@ int main(int argc, const char *argv[])
     int help = 0;
     char host[1024] = DEFAULT_HOST;
     int port = DEFAULT_PORT;
+    int rcvbuf_size = DEFAULT_RCVBUF;
 
     int err = 0;
     for (int i=1; i<argc; i++ ) {
@@ -53,6 +55,13 @@ int main(int argc, const char *argv[])
             }
             i ++;
             port = atoi( argv[i] );
+        } else if ( strcmp(argv[i], "-rb")==0 ) {
+            if( i+1>=argc ) {
+                err = 1;
+                break;
+            }
+            i ++;
+            rcvbuf_size = atoi( argv[i] );
         } else {
             printf("Error argument '%s'\n", argv[i]);
             err = 1;
@@ -96,6 +105,26 @@ int main(int argc, const char *argv[])
     }
     printf("Bind success\n");
 
+    // Set RCVBUF
+    if (rcvbuf_size>0){
+        if ( setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf_size, sizeof(rcvbuf_size))<0 ) {
+            printf("setsockopt error\n");
+        } else {
+            printf("Set RCVBUF %d\n", rcvbuf_size);
+        }
+    }
+
+    // Get RCVBUF
+    {
+        int opt=0;
+        int optlen;
+        if ( getsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &opt, &optlen)<0 ) {
+            printf("getsockopt error\n");
+        } else {
+            printf("Check RCVBUF: %d\n", opt);
+        }
+    }
+    
     ssize_t ss;
     char rcvbuf[100*1024];
     struct sockaddr_in caddr;
