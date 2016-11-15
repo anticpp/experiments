@@ -42,8 +42,8 @@ func newSession(conn net.Conn) *session {
 
 func (s *session) setStop() {
 	s.stop = true
-	close(s.income)
-	close(s.outgoing)
+	//close(s.income)
+	//close(s.outgoing)
 }
 func (s *session) isNormal() bool {
 	return s.stop==false
@@ -71,13 +71,16 @@ func (s *session) serve_read() {
 		for pos < len(pack.buf) {
 			n, err = s.conn.Read(pack.buf[pos:])
 			if err!=nil {
+				fmt.Println("Read error.", err)
 				s.setStop()
-				break;
+				break
 			}
 			pos += n
 		}
 
-		fmt.Println(pack)
+		fmt.Println("Recv Buffer: ")
+		fmt.Println(pack.buf)
+		fmt.Println("Recv Buffer END")
 		s.sendIncome(pack)
 	}
 
@@ -85,16 +88,14 @@ func (s *session) serve_read() {
 	<-s.closeSignal
 	<-s.closeSignal
 
+	fmt.Println("Close conn")
 	s.conn.Close()
 }
 func (s *session) serve_write() {
 
-	for {
+	for s.isNormal() {
 
-		p, ok := <-s.outgoing
-		if !ok {
-			break
-		}
+		p := <-s.outgoing
 
 		_, err := s.conn.Write(p.buf)
 		if err!=nil {
@@ -108,12 +109,9 @@ func (s *session) serve_write() {
 }
 func (s *session) serve_pack() {
 
-	for {
+	for s.isNormal() {
 
-		p, ok := <-s.income
-		if !ok {
-			break
-		}
+		p := <-s.income
 
 		// Doing some job
 		// ...
@@ -155,7 +153,6 @@ func main() {
 			continue
 		}
 		s := newSession(conn)
-		fmt.Println(s)
 		s.start()
 
 	}
