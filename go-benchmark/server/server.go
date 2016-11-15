@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	incomeChanSize = 10000
-	outgoingChanSize = 10000
-	packSize = 4
+	incomeChanSize int
+	outgoingChanSize int
+	packSize int
 )
 
 type pack struct {
@@ -46,7 +46,7 @@ func (s *session) setStop() {
 	close(s.outgoing)
 }
 func (s *session) isNormal() bool {
-	return s.stop
+	return s.stop==false
 }
 func (s *session) sendIncome(p *pack) {
 	s.income <- p
@@ -77,6 +77,7 @@ func (s *session) serve_read() {
 			pos += n
 		}
 
+		fmt.Println(pack)
 		s.sendIncome(pack)
 	}
 
@@ -129,6 +130,9 @@ func main() {
 	var ip = flag.String("h", "", "Listen ip. Default INADDR_ANY.")
 	var port = flag.Int("p", 8000, "Listen port. Default 8000.")
 	var help = flag.Bool("help", false, "Help message.")
+	flag.IntVar(&incomeChanSize, "ichan", 10000, "In channel size.")
+	flag.IntVar(&outgoingChanSize, "ochan", 10000, "Out channel size.")
+	flag.IntVar(&packSize, "packsize", 4, "Package size.")
 	flag.Parse();
 
 	if *help {
@@ -138,7 +142,6 @@ func main() {
 
 	var addr = fmt.Sprintf("%v:%v", *ip, *port)
 	fmt.Printf("Listen on %v\n", addr)
-	return
 
 	ln, err := net.Listen("tcp", addr)
 	if err!=nil {
@@ -152,6 +155,7 @@ func main() {
 			continue
 		}
 		s := newSession(conn)
+		fmt.Println(s)
 		s.start()
 
 	}
