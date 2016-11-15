@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <error.h>
+#include <errno.h>
 #include <sys/types.h>       
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -12,7 +12,7 @@
 
 #define DEFAULT_HOST "*"
 #define DEFAULT_PORT 10010
-#define DEFAULT_RCVBUF 0
+#define DEFAULT_SOCKET_RCVBUF 0
 
 void help_message(int argc, const char *argv[]) {
 
@@ -20,7 +20,7 @@ void help_message(int argc, const char *argv[]) {
     printf("\t--help         'Help message'\n");
     printf("\t-h host        'Listen ip. Default %s.'\n", DEFAULT_HOST);
     printf("\t-p port        'Listen port. Default %d.'\n", DEFAULT_PORT);
-    printf("\t-rb RCVBUF     'Set RCVBUF size. Default %d.'\n", DEFAULT_RCVBUF);
+    printf("\t-srb RCVBUF    'Set socket RCVBUF size. Default %d. Don't set if 0.'\n", DEFAULT_SOCKET_RCVBUF);
 }
 
 int main(int argc, const char *argv[])
@@ -28,7 +28,7 @@ int main(int argc, const char *argv[])
     int help = 0;
     char host[1024] = DEFAULT_HOST;
     int port = DEFAULT_PORT;
-    int rcvbuf_size = DEFAULT_RCVBUF;
+    int rcvbuf_size = DEFAULT_SOCKET_RCVBUF;
 
     int err = 0;
     for (int i=1; i<argc; i++ ) {
@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
             }
             i ++;
             port = atoi( argv[i] );
-        } else if ( strcmp(argv[i], "-rb")==0 ) {
+        } else if ( strcmp(argv[i], "-srb")==0 ) {
             if( i+1>=argc ) {
                 err = 1;
                 break;
@@ -89,6 +89,26 @@ int main(int argc, const char *argv[])
         return 1;
     }
 
+    // Set RCVBUF
+    if (rcvbuf_size>0){
+        if ( setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf_size, sizeof(rcvbuf_size))<0 ) {
+            printf("setsockopt error\n");
+        } else {
+            printf("Set RCVBUF %d\n", rcvbuf_size);
+        }
+    }
+
+    // Get RCVBUF
+    {
+        int opt=0;
+        int optlen=sizeof(optlen);
+        if ( getsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &opt, &optlen)<0 ) {
+            printf("getsockopt error\n");
+        } else {
+            printf("Socket RCVBUF: %d\n", opt);
+        }
+    }
+    
     struct sockaddr_in addr;
     memset(&addr, 0x00, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -103,28 +123,7 @@ int main(int argc, const char *argv[])
         printf("Bind error\n");
         return 1;
     }
-    printf("Bind success\n");
 
-    // Set RCVBUF
-    if (rcvbuf_size>0){
-        if ( setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf_size, sizeof(rcvbuf_size))<0 ) {
-            printf("setsockopt error\n");
-        } else {
-            printf("Set RCVBUF %d\n", rcvbuf_size);
-        }
-    }
-
-    // Get RCVBUF
-    {
-        int opt=0;
-        int optlen;
-        if ( getsockopt(sfd, SOL_SOCKET, SO_RCVBUF, &opt, &optlen)<0 ) {
-            printf("getsockopt error\n");
-        } else {
-            printf("Check RCVBUF: %d\n", opt);
-        }
-    }
-    
     ssize_t ss;
     char rcvbuf[100*1024];
     struct sockaddr_in caddr;
@@ -133,7 +132,7 @@ int main(int argc, const char *argv[])
         
         ss = recvfrom(sfd, rcvbuf, sizeof(rcvbuf), 0, (struct sockaddr *)&caddr, &len);
         if (ss<0) {
-            printf("Recv error\n");
+            printf("Recv error, %s\n", strerror(errno));
             break;
         }
         printf("Recv %d bytes\n", ss);
