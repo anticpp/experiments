@@ -77,7 +77,7 @@ func (s *session) serve_read() {
 		}
 
 		if err!=nil {
-			fmt.Println("Read error.", err)
+			//fmt.Println("Read error.", err)
 			s.setStop()
 			break;
 		}
@@ -89,7 +89,7 @@ func (s *session) serve_read() {
 	<-s.closeSignal
 	<-s.closeSignal
 
-	//fmt.Println("Close conn")
+	//fmt.Println("Close connection", s.conn.RemoteAddr())
 	s.conn.Close()
 }
 func (s *session) serve_write() {
@@ -137,20 +137,23 @@ func (s *session) serve_pack() {
 
 func main() {
 
-	var ip = flag.String("h", "", "Listen ip. Default INADDR_ANY.")
-	var port = flag.Int("p", 8000, "Listen port. Default 8000.")
-	var help = flag.Bool("help", false, "Help message.")
+	var ip string
+	var port int
+	var help bool
+	flag.StringVar(&ip, "h", "", "Listen ip.")
+	flag.IntVar(&port, "p", 8000, "Listen port.")
+	flag.BoolVar(&help, "help", false, "Help message.")
 	flag.IntVar(&incomeChanSize, "ichan", 10000, "In channel size.")
 	flag.IntVar(&outgoingChanSize, "ochan", 10000, "Out channel size.")
 	flag.IntVar(&packSize, "packsize", 4, "Package size.")
 	flag.Parse();
 
-	if *help {
+	if help {
 		flag.PrintDefaults()
 		return
 	}
 
-	var addr = fmt.Sprintf("%v:%v", *ip, *port)
+	var addr = fmt.Sprintf("%v:%v", ip, port)
 	fmt.Printf("Listen on %v\n", addr)
 
 	ln, err := net.Listen("tcp", addr)
@@ -164,6 +167,8 @@ func main() {
 			fmt.Println(err)
 			continue
 		}
+
+		//fmt.Println("New connection", conn.RemoteAddr())
 		s := newSession(conn)
 		s.start()
 
