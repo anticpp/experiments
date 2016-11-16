@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"time"
 	"flag"
 )
 
@@ -61,7 +62,6 @@ func (s *session) start() {
 }
 func (s *session) serve_read() {
 
-
 	var n int
 	var err error
 	for s.isNormal() {
@@ -71,11 +71,15 @@ func (s *session) serve_read() {
 		for pos < len(pack.buf) {
 			n, err = s.conn.Read(pack.buf[pos:])
 			if err!=nil {
-				fmt.Println("Read error.", err)
-				s.setStop()
 				break
 			}
 			pos += n
+		}
+
+		if err!=nil {
+			fmt.Println("Read error.", err)
+			s.setStop()
+			break;
 		}
 
 		s.sendIncome(pack)
@@ -85,19 +89,26 @@ func (s *session) serve_read() {
 	<-s.closeSignal
 	<-s.closeSignal
 
-	fmt.Println("Close conn")
+	//fmt.Println("Close conn")
 	s.conn.Close()
 }
 func (s *session) serve_write() {
 
 	for s.isNormal() {
 
-		p := <-s.outgoing
+		select {
 
-		_, err := s.conn.Write(p.buf)
-		if err!=nil {
-			s.setStop()
+		case p := <-s.outgoing:
+
+			_, err := s.conn.Write(p.buf)
+			if err!=nil {
+				s.setStop()
+			}
 			break
+
+		case <-time.After(time.Second * 1):
+			break
+
 		}
 
 	}
@@ -108,12 +119,16 @@ func (s *session) serve_pack() {
 
 	for s.isNormal() {
 
-		p := <-s.income
+		select {
 
-		// Doing some job
-		// ...
+		case p := <-s.income:
+			s.sendOutgoing(p)
+			break
 
-		s.sendOutgoing(p)
+		case <-time.After(time.Second * 1):
+			break
+
+		}
 
 	}
 
