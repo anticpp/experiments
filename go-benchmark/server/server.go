@@ -61,12 +61,12 @@ func (s *session) start() {
 }
 func (s *session) serve_read() {
 
-	pack := newPack()
 
 	var n int
 	var err error
 	for s.isNormal() {
 
+		pack := newPack()
 		pos := 0
 		for pos < len(pack.buf) {
 			n, err = s.conn.Read(pack.buf[pos:])
@@ -78,9 +78,6 @@ func (s *session) serve_read() {
 			pos += n
 		}
 
-		fmt.Println("Recv Buffer: ")
-		fmt.Println(pack.buf)
-		fmt.Println("Recv Buffer END")
 		s.sendIncome(pack)
 	}
 
