@@ -5,20 +5,13 @@ import (
 	"flag"
 	"net"
 	"time"
+	"github.com/anticpp/experiments/go-benchmark/pack"
 )
 var (
 	packSize int
 	readTimeout int
 	writeTimeout int
 )
-
-type pack struct {
-	buf []byte
-}
-func newPack() *pack {
-	p := &pack{buf: make([]byte, packSize)}
-	return p
-}
 
 func makeRequest(conn net.Conn) error {
 
@@ -27,23 +20,29 @@ func makeRequest(conn net.Conn) error {
 	var pos int
 
 	// Send request
-	req := newPack()
+	req := pack.New(packSize)
 	conn.SetWriteDeadline(time.Now().Add(time.Duration(writeTimeout) * time.Second))
-	_, err = conn.Write(req.buf)
+	_, err = conn.Write(req.Raw())
 	if err!=nil {
 		return err
 	}
 
 	// Read response
-	resp := newPack()
+	resp := pack.New(packSize)
+	rbuf := resp.Raw()
 	pos = 0
-	for pos < len(resp.buf) {
+	for pos < len(rbuf) {
 		conn.SetReadDeadline(time.Now().Add(time.Duration(readTimeout) * time.Second))
-		n, err = conn.Read(resp.buf[pos:])
+		n, err = conn.Read(rbuf[pos:])
 		if err!=nil {
+			fmt.Println(err)
 			return err
 		}
 		pos += n
+	}
+
+	if !resp.Check() {
+		fmt.Println("Package check error")
 	}
 	return nil
 }
@@ -69,7 +68,7 @@ func worker(name string, addr string, requests int, c chan int) {
 
 		for ; total<requests; total++ {
 
-			fmt.Printf("[%v] %v request\n", name, total)
+			//fmt.Printf("[%v] %v request\n", name, total)
 			err = makeRequest(conn)
 			if err!=nil {
 				break
@@ -85,7 +84,7 @@ func worker(name string, addr string, requests int, c chan int) {
 		// else continue
 	}
 
-	fmt.Println(name, "closed")
+	//fmt.Println(name, "closed")
 	c <- 0
 }
 
@@ -100,7 +99,7 @@ func main() {
 	flag.IntVar(&port, "p", 8000, "Server port.")
 	flag.IntVar(&concurency, "c", 100, "Number of mutilple request to make.")
 	flag.IntVar(&nRequest, "n", 100, "Number of request to perform.")
-	flag.IntVar(&packSize, "packsize", 4, "Package size.")
+	flag.IntVar(&packSize, "packsize", 100, "Package size.")
 	flag.IntVar(&readTimeout, "rto", 5, "Read timeout.")
 	flag.IntVar(&writeTimeout, "wto", 5, "Write timeout.")
 	flag.BoolVar(&help, "help", false, "Help message.")
@@ -119,6 +118,7 @@ func main() {
 		name := fmt.Sprintf("worker_%v", i)
 		go worker(name, addr, nRequest, c)
 	}
+	fmt.Printf("%v worker spawned\n", concurency)
 
 	// Wait worker complete
 	for i:=0; i<concurency; i++ {

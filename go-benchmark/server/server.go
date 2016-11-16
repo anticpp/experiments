@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 	"flag"
+	"github.com/anticpp/experiments/go-benchmark/pack"
 )
 
 var (
@@ -13,20 +14,12 @@ var (
 	packSize int
 )
 
-type pack struct {
-	buf []byte
-}
-func newPack() *pack {
-	p := &pack{buf: make([]byte, packSize)}
-	return p
-}
-
 type session struct {
 	conn net.Conn
 	stop bool
 
-	income chan *pack
-	outgoing chan *pack
+	income chan *pack.Pack
+	outgoing chan *pack.Pack
 
 	closeSignal chan int
 }
@@ -35,8 +28,8 @@ func newSession(conn net.Conn) *session {
 	return &session{
 			conn: conn,
 			stop: false,
-			income: make(chan *pack, incomeChanSize),
-			outgoing: make(chan *pack, outgoingChanSize),
+			income: make(chan *pack.Pack, incomeChanSize),
+			outgoing: make(chan *pack.Pack, outgoingChanSize),
 			closeSignal: make(chan int),
 	}
 }
@@ -49,10 +42,10 @@ func (s *session) setStop() {
 func (s *session) isNormal() bool {
 	return s.stop==false
 }
-func (s *session) sendIncome(p *pack) {
+func (s *session) sendIncome(p *pack.Pack) {
 	s.income <- p
 }
-func (s *session) sendOutgoing(p *pack) {
+func (s *session) sendOutgoing(p *pack.Pack) {
 	s.outgoing <- p
 }
 func (s *session) start() {
@@ -66,10 +59,11 @@ func (s *session) serve_read() {
 	var err error
 	for s.isNormal() {
 
-		pack := newPack()
+		req := pack.New(packSize)
+		buf := req.Raw()
 		pos := 0
-		for pos < len(pack.buf) {
-			n, err = s.conn.Read(pack.buf[pos:])
+		for pos < len(buf) {
+			n, err = s.conn.Read(buf[pos:])
 			if err!=nil {
 				break
 			}
@@ -82,7 +76,14 @@ func (s *session) serve_read() {
 			break;
 		}
 
-		s.sendIncome(pack)
+		// Check package
+		if !req.Check() {
+			fmt.Println("Package check error")
+			s.setStop()
+			break;
+		}
+
+		s.sendIncome(req)
 	}
 
 	// Wait serve_write, server_pack
@@ -100,7 +101,7 @@ func (s *session) serve_write() {
 
 		case p := <-s.outgoing:
 
-			_, err := s.conn.Write(p.buf)
+			_, err := s.conn.Write(p.Raw())
 			if err!=nil {
 				s.setStop()
 			}
@@ -145,7 +146,7 @@ func main() {
 	flag.BoolVar(&help, "help", false, "Help message.")
 	flag.IntVar(&incomeChanSize, "ichan", 10000, "In channel size.")
 	flag.IntVar(&outgoingChanSize, "ochan", 10000, "Out channel size.")
-	flag.IntVar(&packSize, "packsize", 4, "Package size.")
+	flag.IntVar(&packSize, "packsize", 100, "Package size.")
 	flag.Parse();
 
 	if help {
