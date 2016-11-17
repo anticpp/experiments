@@ -160,6 +160,7 @@ func main() {
 	fmt.Println("")
 	fmt.Println("Benchmarking ... wait")
 
+	return
 	startMs := float64((time.Now().UnixNano()) / 1000000)
 	for i := 0; i < concurency; i++ {
 		name := fmt.Sprintf("worker_%v", i)
@@ -178,7 +179,7 @@ func main() {
 		totalMs = 1
 	}
 
-	qps := float64(stat.completeRequests) / totalMs
+	qps := float64(stat.completeRequests) * 1000 / totalMs
 	tpr := float64(0.00)
 	if stat.completeRequests > 0 {
 		tpr = totalMs / float64(stat.completeRequests)
