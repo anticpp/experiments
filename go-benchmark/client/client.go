@@ -29,7 +29,6 @@ func (s *statInfo) calAvgRequestMs(ms float64) {
 	s.mutexAvgRequestMs.Lock()
 	defer s.mutexAvgRequestMs.Unlock()
 
-	fmt.Printf("calAvgRequestMs %0.2f\n", ms)
 	s.avgRequestNSamples++
 
 	n := float64(s.avgRequestNSamples)
