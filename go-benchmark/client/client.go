@@ -160,7 +160,6 @@ func main() {
 	fmt.Println("")
 	fmt.Println("Benchmarking ... wait")
 
-	return
 	startMs := float64((time.Now().UnixNano()) / 1000000)
 	for i := 0; i < concurency; i++ {
 		name := fmt.Sprintf("worker_%v", i)
