@@ -4,6 +4,7 @@
 
 #define NUM(c) ((c)-'0')
 
+// 1+(2*(3+1+2)*3)
 int calc(const char *in, int len) {
     if(len==1) {
         return NUM(in[0]);
@@ -81,7 +82,8 @@ int main(int argc, const char *argv[])
         {"1+2*3", 7},
         {"1+2*3+5/3", 8},
         {"1+2*3+5/3+1+2*3", 15},
-        {"1+2*(3+4)/7+1", 4}
+        {"1+2*(3+4)/7+1", 4},
+        {"1+((2*3)+2)+1", 10}
     };  
 
     for(int i=0; i<sizeof(cases)/sizeof(struct test_case); i++) {
