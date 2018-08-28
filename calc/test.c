@@ -17,7 +17,6 @@ struct test_case2 {
 
 int main(int argc, const char *argv[])
 {
-#if 1
     printf("[TEST Convert RPN]\n");
     struct test_case1 cases1[] = {
         {"1+2+3+4", "12+3+4+"},
@@ -41,8 +40,6 @@ int main(int argc, const char *argv[])
         }
         free(out);
     }
-#endif
-#if 1
     // Revert polish notation
     printf("[TEST Revert polish notation]\n");
     struct test_case2 cases2[] = {
@@ -66,6 +63,5 @@ int main(int argc, const char *argv[])
         }
     }
     
-#endif
     return 0;
 }

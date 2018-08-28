@@ -1,1 +1,21 @@
-Caculate like '1+2+3'
+Revert polish notation
+==========================
+
+
+## Build
+
+```
+make all
+```
+
+## Test
+
+```
+./test
+```
+
+## Run
+
+```
+./calc
+```
