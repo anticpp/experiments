@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
+#include <sys/time.h>
 
 int cnt_comp = 0;
 
-void qsort(int arr[], int start, int end) {
+void mqsort(int arr[], int start, int end) {
     int i = start;
     int j = end;
     int sentinel = arr[j];
@@ -19,25 +21,65 @@ void qsort(int arr[], int start, int end) {
 
     // Left
     if(i-start>0)
-        qsort(arr, start, i-1);
+        mqsort(arr, start, i-1);
 
     // Right
     if(end-i>0)
-        qsort(arr, i+1, end);
+        mqsort(arr, i+1, end);
+}
+
+const int max_array_value = 100;
+const int max_array_len = 30;
+const int sample_num = 10;
+
+typedef struct {
+    int *a;
+    int len;
+} array;
+
+array* array_create(int len) {
+    array *arr = (array *)malloc(sizeof(array)+sizeof(int)*len);
+    arr->a = (int *)(arr+1);
+    arr->len = len;
+    return arr;
+}
+
+void array_destroy(array *arr) {
+    free(arr);
 }
 
 int main(int argc, const char *argv[]) {
-    //int arr[] = {9, 1, 4, 7, 3, 2, 1};
-    //int arr[] = {9, 1, 4, 13, 3, 2, 1, 18, 29, 12, 56, 3, 2, 90, 13};
-    int arr[] = {9, 1, 4, 13, 3, 2, 1, 18, 29, 12, 56, 3, 2, 90, 12};
-    int len = sizeof(arr)/sizeof(int);
-    qsort(arr, 0, len-1);
- 
-    printf("Array N: %d\n", len);
-    printf("Compare count: %d\n", cnt_comp);
-    for(int i=0; i<len; i++) {
-        printf("%d, ", arr[i]);
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    srandom(tv.tv_sec * 1000 
+                + tv.tv_usec / 1000); // milisecond
+
+    // Create samples
+    array *samples[sample_num];
+    for(int i=0; i<sample_num; i++) {
+        int len = (random() % max_array_len);
+        if(len==0) 
+            len = 10;
+        
+        array *arr = array_create(len);
+        samples[i] = arr;
+        for(int j=0; j<len; j++) {
+            arr->a[j] = (random() % max_array_value);
+        }
     }
-    printf("\n");
+
+    for(int i=0; i<sample_num; i++) {
+        array *arr = samples[i];
+        printf("Array Len: %d\n", arr->len);
+
+        cnt_comp = 0;
+        mqsort(arr->a, 0, arr->len-1);
+ 
+        printf("Compare: %d\n", cnt_comp);
+        for(int i=0; i<arr->len; i++) {
+            printf("%d, ", arr->a[i]);
+        }
+        printf("\n");
+    }
 }
 
