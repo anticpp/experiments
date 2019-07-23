@@ -1,10 +1,10 @@
 
 .PHONY: all clean
 
-main: main.c utility.c bubble.c
-	gcc main.c -o $@
+main: main.c 
+	gcc $^ -o $@
 
 all: main
 
 clean:
-	rm -vf main
+	rm -vf main *.o
