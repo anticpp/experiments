@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     int *a;
@@ -10,6 +11,12 @@ array* array_create(int len) {
     arr->a = (int *)(arr+1);
     arr->len = len;
     return arr;
+}
+
+array* array_copy(array *arr) {
+    array *n = array_create(arr->len);
+    memcpy(n->a, arr->a, arr->len * sizeof(arr->len));
+    return n;
 }
 
 void array_destroy(array *arr) {

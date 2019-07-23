@@ -2,6 +2,9 @@
 
 void cnt_inc_comp();
 
+/*
+ * Quicksort
+ */
 void mqsort(int arr[], int start, int end) {
     int i = start;
     int j = end;

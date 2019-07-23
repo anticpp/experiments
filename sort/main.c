@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include "qsort.c"
+#include "isort.c"
 #include "array.c"
 #include "count.c"
 
@@ -12,6 +13,19 @@ const int DEFAULT_MAX_ARRAY_LEN = 30;
 const int DEFAULT_MAX_ARRAY_VAL = 100;
 
 typedef array* sample;
+
+typedef void (*sortfunc)(int*, int, int);
+
+typedef struct {
+    const char *name;
+    sortfunc f;
+} sort;
+
+sort sorts[] = {
+        {"isort", isort}, 
+        {"qsort", mqsort}
+};
+int sorts_n = sizeof(sorts)/sizeof(sort);
 
 /*
  * Return:
@@ -55,6 +69,14 @@ void destroy_samples(sample *s, int num) {
     free(s);
 }
 
+int check_array_asc(int arr[], int len) {
+    for(int i=1; i<len; i++) {
+        if( arr[i]<arr[i-1] )
+            return 0;
+    }
+    return 1;
+}
+
 int main(int argc, const char *argv[]) {
     int pflag = 0;
     int sn = DEFAULT_SAMPLE_NUM;
@@ -87,17 +109,31 @@ int main(int argc, const char *argv[]) {
 
     sample *s = create_random_samples(sn, mal, mav);
     for(int i=0; i<sn; i++) {
-        cnt_reset();
-
         array *arr = s[i];
-        if(pflag)
-            array_print(arr);
-
-        mqsort(arr->a, 0, arr->len-1);
 
         if(pflag)
             array_print(arr);
-        printf("N: %d, C: %d\n", arr->len, cnt_get_comp());
+
+        //mqsort(arr->a, 0, arr->len-1);
+        //isort(arr->a, 0, arr->len-1);
+        printf("N: %d, ", arr->len);
+        for(int j=0; j<sorts_n; j++) {
+            sort st = sorts[j];
+            array *narr = array_copy(arr);
+
+            cnt_reset();
+            st.f(narr->a, 0, narr->len-1);
+            printf("%s: %d, ", st.name, cnt_get_comp());
+
+            if( !check_array_asc(narr->a, narr->len) ) {
+                printf("[FATAL] Sort error!");
+                abort();
+            }
+            array_destroy(narr);
+        }
+        printf("\n");
+        
+
     }
 
     destroy_samples(s, sn);

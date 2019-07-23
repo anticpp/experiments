@@ -1,8 +1,8 @@
 
 .PHONY: all clean
 
-main: main.c 
-	gcc $^ -o $@
+main: main.c array.c count.c isort.c qsort.c
+	gcc main.c -o $@
 
 all: main
 
