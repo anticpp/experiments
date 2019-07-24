@@ -1,10 +1,10 @@
 
 .PHONY: all clean
 
-main: main.c array.c count.c isort.c qsort.c test_data.c
+sort: main.c array.c count.c isort.c qsort.c test_data.c
 	gcc main.c -o $@
 
-all: main
+all: sort
 
 clean:
-	rm -vf main *.o
+	rm -vf sort *.o
