@@ -33,3 +33,11 @@ void array_print(array *arr) {
      }
      printf("]\n");
 }
+
+int array_is_asc(array *arr) {
+    for(int i=1; i<arr->len; i++) {
+        if( arr->a[i]<arr->a[i-1] )
+            return 0;
+    }
+    return 1;
+}
