@@ -76,7 +76,9 @@ int main(int argc, const char *argv[]) {
 
             cnt_reset();
             st.f(narr->a, 0, narr->len-1);
-            
+            //if(pflag)
+            //    array_print(narr);
+
             // Check sorted array
             if( cflag && !array_is_asc(narr) ) {
                 printf("%s(sort error!): %d, ", st.name, cnt_get_comp());

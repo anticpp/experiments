@@ -16,8 +16,8 @@ void isort(int arr[], int start, int end) {
             }
         }
         // Move backward
-        for(;j<ii; ii--)
-            arr[ii] = arr[i-1];
+        for(;ii>j; ii--)
+            arr[ii] = arr[ii-1];
 
         // Set value
         arr[j] = val;
