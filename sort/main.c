@@ -4,6 +4,7 @@
 #include <string.h>
 #include "qsort.c"
 #include "isort.c"
+#include "bsort.c"
 #include "array.c"
 #include "count.c"
 #include "test_data.c"
@@ -22,6 +23,7 @@ typedef struct {
 
 sort sorts[] = {
         {"isort", isort}, 
+        {"bsort", bsort},
         {"qsort", mqsort}
 };
 int sorts_n = sizeof(sorts)/sizeof(sort);
@@ -69,7 +71,7 @@ int main(int argc, const char *argv[]) {
         if(pflag)
             array_print(arr);
 
-        printf("N: %d, ", arr->len);
+        printf("N: %-10d ", arr->len);
         for(int j=0; j<sorts_n; j++) {
             sort st = sorts[j];
             array *narr = array_copy(arr);
@@ -83,7 +85,7 @@ int main(int argc, const char *argv[]) {
             if( cflag && !array_is_asc(narr) ) {
                 printf("%s(sort error!): %d, ", st.name, cnt_get_comp());
             } else {
-                printf("%s: %d, ", st.name, cnt_get_comp());
+                printf("%s: %-10d ", st.name, cnt_get_comp());
             }
 
             array_destroy(narr);
