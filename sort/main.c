@@ -61,7 +61,12 @@ int main(int argc, const char *argv[]) {
         }
     }
 
-    printf("Tests(n): %d, Max array len: %d, Max array value: %d.\n\n", tn, mal, mav);
+    printf("Tests(n): %d, Max array len: %d, Max array value: %d.\n", tn, mal, mav);
+    if(cflag) {
+        printf("Sort check: YES.\n\n");
+    } else {
+        printf("\n");
+    }
 
     test_data *td = test_data_create(tn);
     test_data_fullfill(td, mal, mav);
