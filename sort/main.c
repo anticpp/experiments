@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/time.h>
 #include "qsort.c"
 #include "isort.c"
 #include "bsort.c"
@@ -10,8 +11,8 @@
 #include "test_data.c"
 
 const int DEFAULT_TEST_NUM = 10;
-const int DEFAULT_MAX_ARRAY_LEN = 30;
-const int DEFAULT_MAX_ARRAY_VAL = 100;
+const int DEFAULT_MAX_ARRAY_LEN = 50000;
+const int DEFAULT_MAX_ARRAY_VAL = 100000;
 
 // Sort function
 typedef void (*sortfunc)(int*, int, int);
@@ -63,9 +64,9 @@ int main(int argc, const char *argv[]) {
 
     printf("Tests(n): %d, Max array len: %d, Max array value: %d.\n", tn, mal, mav);
     if(cflag) {
-        printf("Sort check: YES.\n\n");
+        printf("Sort check: On.\n\n");
     } else {
-        printf("\n");
+        printf("Sort check: Off.\n\n");
     }
 
     test_data *td = test_data_create(tn);
@@ -76,22 +77,28 @@ int main(int argc, const char *argv[]) {
         if(pflag)
             array_print(arr);
 
-        printf("N: %-10d ", arr->len);
+        printf("Array Len: %d\n", arr->len);
+        printf("%-15s %-15s %-15s\n", "Algorithm", "Compare", "Elapse(ms)");
         for(int j=0; j<sorts_n; j++) {
             sort st = sorts[j];
             array *narr = array_copy(arr);
 
+            // Reset counter
             cnt_reset();
-            st.f(narr->a, 0, narr->len-1);
-            //if(pflag)
-            //    array_print(narr);
 
-            // Check sorted array
-            if( cflag && !array_is_asc(narr) ) {
-                printf("%s(sort error!): %d, ", st.name, cnt_get_comp());
-            } else {
-                printf("%s: %-10d ", st.name, cnt_get_comp());
-            }
+            // Begin time
+            time_t begin_us = now_us();
+
+            st.f(narr->a, 0, narr->len-1);
+
+            // End time
+            time_t elapse_us = now_us() - begin_us;
+
+            // Check sort result
+            if( cflag && !array_is_asc(narr) )
+                printf("Error: Sort check fail for '%s'\n", st.name);
+            
+            printf("%-15s %-15d %ld.%-10ld\n", st.name, cnt_get_comp(), elapse_us/1000, elapse_us%1000);
 
             array_destroy(narr);
         }
