@@ -1,8 +1,4 @@
-
-void cnt_inc_comp();
-
-/*
- * Insert sort
+/* Insert sort
  */
 void isort(int arr[], int start, int end) {
     for(int i=start+1; i<=end; i++) {

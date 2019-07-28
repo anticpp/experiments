@@ -1,4 +1,3 @@
-
 int cnt_comp = 0;
 
 void cnt_reset() {

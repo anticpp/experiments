@@ -1,7 +1,5 @@
-#include "utility.c"
-
-void cnt_inc_comp();
-
+/* Bubble sort
+ */
 void bsort(int arr[], int start, int end) {
     int low = start;
     int high = end;

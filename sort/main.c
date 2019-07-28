@@ -3,12 +3,15 @@
 #include <assert.h>
 #include <string.h>
 #include <sys/time.h>
+#include "utility.c"
+#include "count.c"
+#include "array.c"
+#include "test_data.c"
+
+#include "ssort.c"
 #include "qsort.c"
 #include "isort.c"
 #include "bsort.c"
-#include "array.c"
-#include "count.c"
-#include "test_data.c"
 
 const int DEFAULT_TEST_NUM = 10;
 const int DEFAULT_MAX_ARRAY_LEN = 50000;
@@ -24,6 +27,7 @@ typedef struct {
 
 sort sorts[] = {
         {"isort", isort}, 
+        {"ssort", isort}, 
         {"bsort", bsort},
         {"qsort", mqsort}
 };
