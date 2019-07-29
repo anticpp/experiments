@@ -8,9 +8,9 @@
 #include "array.c"
 #include "test_data.c"
 
+#include "isort.c"
 #include "ssort.c"
 #include "qsort.c"
-#include "isort.c"
 #include "bsort.c"
 
 const int DEFAULT_TEST_NUM = 10;
@@ -27,7 +27,7 @@ typedef struct {
 
 sort sorts[] = {
         {"isort", isort}, 
-        {"ssort", isort}, 
+        {"ssort", ssort}, 
         {"bsort", bsort},
         {"qsort", mqsort}
 };
@@ -95,6 +95,7 @@ int main(int argc, const char *argv[]) {
 
             st.f(narr->a, 0, narr->len-1);
 
+
             // End time
             time_t elapse_us = now_us() - begin_us;
 
@@ -103,6 +104,10 @@ int main(int argc, const char *argv[]) {
                 printf("Error: Sort check fail for '%s'\n", st.name);
             
             printf("%-15s %-15d %ld.%-10ld\n", st.name, cnt_get_comp(), elapse_us/1000, elapse_us%1000);
+            if(pflag) {
+                printf("Sorted: ");
+                array_print(narr);
+            }
 
             array_destroy(narr);
         }
