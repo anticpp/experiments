@@ -1,7 +1,7 @@
 
 .PHONY: all clean
 
-sort: main.c array.c count.c isort.c qsort.c test_data.c
+sort: main.c array.c count.c isort.c qsort.c ssort.c test_data.c
 	gcc main.c -o $@
 
 all: sort
