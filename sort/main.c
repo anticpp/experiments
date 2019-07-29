@@ -90,14 +90,9 @@ int main(int argc, const char *argv[]) {
             // Reset counter
             cnt_reset();
 
-            // Begin time
-            time_t begin_us = now_us();
-
+            time_t begin_us = now_us(); // Begin time
             st.f(narr->a, 0, narr->len-1);
-
-
-            // End time
-            time_t elapse_us = now_us() - begin_us;
+            time_t elapse_us = now_us() - begin_us; // Elapse
 
             // Check sort result
             if( cflag && !array_is_asc(narr) )
