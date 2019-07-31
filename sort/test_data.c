@@ -8,8 +8,8 @@ typedef struct {
 } test_data;
 
 test_data* test_data_create(int n) {
-    test_data *td = malloc(sizeof(test_data));
-    td->arrs = malloc(sizeof(array*)*n);
+    test_data *td = malloc(sizeof(test_data)+sizeof(array*)*n);
+    td->arrs = (array**)(td+1);
     td->n = n;
 
     for(int i=0; i<n; i++)
