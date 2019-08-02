@@ -29,6 +29,7 @@ sort sorts[] = {
         {"isort", isort}, 
         {"ssort", ssort}, 
         {"bsort", bsort},
+        {"bbsort", bbsort},
         {"qsort", mqsort}
 };
 int sorts_n = sizeof(sorts)/sizeof(sort);
@@ -56,8 +57,8 @@ int main(int argc, const char *argv[]) {
             i++;
         } else {
             printf("Usage: %s [options]\n\n", argv[0]);
-            printf("    -p        Print array data.\n");
-            printf("    -c        Check sorted data.\n");
+            printf("    -p        Print array data before and after sorted. Useful for handy debug.\n");
+            printf("    -c        Check if correct order for sorted data.\n");
             printf("    -tn int   Test data number. Default %d.\n", DEFAULT_TEST_NUM);
             printf("    -mal int  Max array len. Default %d.\n", DEFAULT_MAX_ARRAY_LEN);
             printf("    -mav int  Max array value. Default %d.\n", DEFAULT_MAX_ARRAY_VAL);
