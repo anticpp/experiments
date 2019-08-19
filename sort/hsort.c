@@ -31,8 +31,10 @@ void heap_adjust(int arr[], int i, int end) {
         if(next==0)                         // arr[i] is a leaf node
             break;
 
-        if(arr[i]>arr[next])                // arr[i] is smallest, instantly stop
+        if(arr[i]>arr[next]) {                // arr[i] is smallest, instantly stop 
+            cnt_inc_comp();
             break;
+        }
 
         swap(arr, i, next);
         i = next;
