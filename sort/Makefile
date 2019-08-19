@@ -1,7 +1,9 @@
 
 .PHONY: all clean
 
-sort: main.c array.c count.c isort.c qsort.c ssort.c test_data.c
+SRCS=$(wildcard *.c)
+
+sort: $(SRCS)
 	gcc main.c -o $@
 
 all: sort
